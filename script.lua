@@ -1,15 +1,23 @@
 -- [[ NEXUS M — ULTRA RESPONSIVE GLASSMORPHISM HUB ]] --
--- Developer: Colin | Full Mobile/PC Adaptive UI
+-- Developer: Colin | Mobile Executor Safe Version
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-
 local LocalPlayer = Players.LocalPlayer
 
--- [ ЗАЩИТА: Прячем GUI от проверок игры ]
-local TargetGui = (gethui and gethui()) or game:GetService("CoreGui") or LocalPlayer:WaitForChild("PlayerGui")
+----------------------------------------------------------------
+-- [ ЗАЩИТА: Безопасный инжект для мобильных экзекьюторов ]
+----------------------------------------------------------------
+local TargetGui = LocalPlayer:WaitForChild("PlayerGui")
+pcall(function()
+    if type(gethui) == "function" then
+        TargetGui = gethui()
+    elseif game:GetService("CoreGui") then
+        TargetGui = game:GetService("CoreGui")
+    end
+end)
 
 if TargetGui:FindFirstChild("NexusHub_V2") then 
     TargetGui.NexusHub_V2:Destroy() 
@@ -35,7 +43,12 @@ local CFG = {
     Purple = Color3.fromRGB(155, 90, 255),
 }
 
-local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local isMobile = false
+if UserInputService.TouchEnabled then
+    if not UserInputService.KeyboardEnabled then
+        isMobile = true
+    end
+end
 
 ----------------------------------------------------------------
 -- [ГЛАВНЫЙ SCREENGUI]
@@ -128,12 +141,14 @@ local function makeDraggable(handle, target)
 
     local function onInputChanged(inp)
         local t = inp.UserInputType
-        if dragging and (t == Enum.UserInputType.MouseMovement or t == Enum.UserInputType.Touch) then
-            local d = inp.Position - dStart
-            target.Position = UDim2.new(
-                tStart.X.Scale, tStart.X.Offset + d.X,
-                tStart.Y.Scale, tStart.Y.Offset + d.Y
-            )
+        if dragging then
+            if t == Enum.UserInputType.MouseMovement or t == Enum.UserInputType.Touch then
+                local d = inp.Position - dStart
+                target.Position = UDim2.new(
+                    tStart.X.Scale, tStart.X.Offset + d.X,
+                    tStart.Y.Scale, tStart.Y.Offset + d.Y
+                )
+            end
         end
     end
 
@@ -142,7 +157,7 @@ local function makeDraggable(handle, target)
 end
 
 ----------------------------------------------------------------
--- [AMBIENT PARTICLES — красивый фоновый эффект]
+-- [AMBIENT PARTICLES]
 ----------------------------------------------------------------
 local ParticleCanvas = Instance.new("Frame")
 ParticleCanvas.Name = "ParticleCanvas"
@@ -153,11 +168,15 @@ ParticleCanvas.Parent = ScreenGui
 
 local particles = {}
 local function spawnParticle()
-    local vp = workspace.CurrentCamera.ViewportSize
     local p = Instance.new("Frame")
     p.Size = UDim2.new(0, math.random(2,5), 0, math.random(2,5))
     p.Position = UDim2.new(math.random(), 0, math.random(), 0)
-    p.BackgroundColor3 = math.random() > 0.5 and CFG.Accent or CFG.Purple
+    
+    local bgCol = CFG.Purple
+    if math.random() > 0.5 then 
+        bgCol = CFG.Accent 
+    end
+    p.BackgroundColor3 = bgCol
     p.BackgroundTransparency = math.random(60,90)/100
     p.BorderSizePixel = 0
     p.ZIndex = 1
@@ -197,7 +216,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 ----------------------------------------------------------------
--- [FLOATING BUTTON — мобильная кнопка открытия]
+-- [FLOATING BUTTON]
 ----------------------------------------------------------------
 local FB = Instance.new("TextButton")
 FB.Name = "FloatBtn"
@@ -209,7 +228,6 @@ FB.AutoButtonColor = false
 FB.ZIndex = 10
 FB.Parent = ScreenGui
 corner(FB, 16)
-stroke(FB, CFG.Accent, 1.5)
 
 local FBIcon = Instance.new("TextLabel")
 FBIcon.Size = UDim2.new(1,0,1,0)
@@ -223,25 +241,7 @@ FBIcon.TextYAlignment = Enum.TextYAlignment.Center
 FBIcon.ZIndex = 11
 FBIcon.Parent = FB
 
-local FBGlow = Instance.new("Frame")
-FBGlow.Size = UDim2.new(1, 20, 1, 20)
-FBGlow.Position = UDim2.new(0, -10, 0, -10)
-FBGlow.BackgroundColor3 = CFG.Accent
-FBGlow.BackgroundTransparency = 0.85
-FBGlow.ZIndex = 9
-FBGlow.Parent = FB
-corner(FBGlow, 20)
-
 makeDraggable(FB, FB)
-
-task.spawn(function()
-    while true do
-        tween(FBGlow, {BackgroundTransparency=0.7, Size=UDim2.new(1,26,1,26), Position=UDim2.new(0,-13,0,-13)}, 0.9, Enum.EasingStyle.Sine)
-        task.wait(0.9)
-        tween(FBGlow, {BackgroundTransparency=0.92, Size=UDim2.new(1,14,1,14), Position=UDim2.new(0,-7, 0,-7)}, 0.9, Enum.EasingStyle.Sine)
-        task.wait(0.9)
-    end
-end)
 
 ----------------------------------------------------------------
 -- [ГЛАВНОЕ ОКНО]
@@ -272,17 +272,6 @@ AccentBar.BorderSizePixel = 0
 AccentBar.ZIndex = 22
 AccentBar.Parent = MainFrame
 gradient(AccentBar, CFG.Accent, CFG.Purple, 0)
-
-local GlassHighlight = Instance.new("Frame")
-GlassHighlight.Size = UDim2.new(0.7, 0, 0.4, 0)
-GlassHighlight.Position = UDim2.new(-0.1, 0, -0.2, 0)
-GlassHighlight.BackgroundColor3 = CFG.Accent
-GlassHighlight.BackgroundTransparency = 0.93
-GlassHighlight.BorderSizePixel = 0
-GlassHighlight.ZIndex = 21
-GlassHighlight.Rotation = -20
-GlassHighlight.Parent = MainFrame
-corner(GlassHighlight, 80)
 
 ----------------------------------------------------------------
 -- [ШАПКА ОКНА (HEADER)]
@@ -317,7 +306,6 @@ LogoCircle.BorderSizePixel = 0
 LogoCircle.ZIndex = 24
 LogoCircle.Parent = Header
 corner(LogoCircle, 10)
-stroke(LogoCircle, CFG.Accent, 1.5)
 
 local LogoIcon = Instance.new("TextLabel")
 LogoIcon.Size = UDim2.new(1,0,1,0)
@@ -354,36 +342,6 @@ SubLabel.TextColor3 = CFG.TextMuted
 SubLabel.TextXAlignment = Enum.TextXAlignment.Left
 SubLabel.ZIndex = 24
 SubLabel.Parent = Header
-
-local Badge = Instance.new("Frame")
-Badge.Size = UDim2.new(0, 64, 0, 20)
-Badge.Position = UDim2.new(0, 178, 0.5, -10)
-Badge.BackgroundColor3 = Color3.fromRGB(20, 60, 35)
-Badge.BorderSizePixel = 0
-Badge.ZIndex = 24
-Badge.Parent = Header
-corner(Badge, 6)
-
-local BadgeDot = Instance.new("Frame")
-BadgeDot.Size = UDim2.new(0, 6, 0, 6)
-BadgeDot.Position = UDim2.new(0, 6, 0.5, -3)
-BadgeDot.BackgroundColor3 = CFG.Green
-BadgeDot.BorderSizePixel = 0
-BadgeDot.ZIndex = 25
-BadgeDot.Parent = Badge
-corner(BadgeDot, 99)
-
-local BadgeText = Instance.new("TextLabel")
-BadgeText.Size = UDim2.new(1,-16,1,0)
-BadgeText.Position = UDim2.new(0,16,0,0)
-BadgeText.BackgroundTransparency = 1
-BadgeText.Text = "ACTIVE"
-BadgeText.TextSize = 9
-BadgeText.Font = Enum.Font.GothamBold
-BadgeText.TextColor3 = CFG.Green
-BadgeText.TextXAlignment = Enum.TextXAlignment.Left
-BadgeText.ZIndex = 25
-BadgeText.Parent = Badge
 
 local function makeWinBtn(icon, posX, bgColor, iconColor)
     local btn = Instance.new("TextButton")
@@ -519,21 +477,25 @@ local function switchPage(id, tabData)
 end
 
 ----------------------------------------------------------------
--- [СОЗДАНИЕ ВКЛАДКИ (TAB BUTTON)]
+-- [СОЗДАНИЕ ВКЛАДКИ]
 ----------------------------------------------------------------
 local tabDefs = {
-    {id="main", icon="🏠", label="Главная", color=CFG.Accent},
-    {id="combat", icon="⚔️", label="Бой", color=CFG.Red},
-    {id="visuals", icon="👁", label="Визуал", color=CFG.Purple},
-    {id="player", icon="🏃", label="Игрок", color=CFG.Green},
-    {id="misc", icon="⚙️", label="Прочее", color=CFG.Yellow},
+    {id="main", icon="🏠", label="Главная"},
+    {id="combat", icon="⚔️", label="Бой"},
+    {id="visuals", icon="👁", label="Визуал"},
+    {id="player", icon="🏃", label="Игрок"},
+    {id="misc", icon="⚙️", label="Прочее"},
 }
 
 local tabButtons = {}
 
 for i, def in ipairs(tabDefs) do
     local btn = Instance.new("TextButton")
-    btn.Size = isMobile and UDim2.new(1, 0, 0, 44) or UDim2.new(1, 0, 0, 38)
+    
+    local btnH = 38
+    if isMobile then btnH = 44 end
+    btn.Size = UDim2.new(1, 0, 0, btnH)
+    
     btn.BackgroundTransparency = 1
     btn.Text = ""
     btn.AutoButtonColor = false
@@ -585,7 +547,6 @@ for i, def in ipairs(tabDefs) do
         ico.TextXAlignment = Enum.TextXAlignment.Center
     end
 
-    -- Упаковываем элементы вкладки в таблицу
     local tabData = {
         button = btn,
         bg = bg,
@@ -612,7 +573,6 @@ for i, def in ipairs(tabDefs) do
     end)
 end
 
--- Активируем первую вкладку
 switchPage("main", tabButtons["main"])
 
 ----------------------------------------------------------------
@@ -639,15 +599,6 @@ local function card(parent, height, order)
     f.Parent = parent
     corner(f, 10)
     stroke(f, Color3.fromRGB(38, 42, 68), 1, 0)
-
-    local shine = Instance.new("Frame")
-    shine.Size = UDim2.new(1, -20, 0, 1)
-    shine.Position = UDim2.new(0, 10, 0, 0)
-    shine.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    shine.BackgroundTransparency = 0.88
-    shine.BorderSizePixel = 0
-    shine.ZIndex = f.ZIndex+1
-    shine.Parent = f
     return f
 end
 
@@ -668,7 +619,6 @@ local function toggleCard(parent, iconText, titleText, descText, accentColor, or
     ico.ZIndex = c.ZIndex+2
     ico.Parent = c
     corner(ico, 10)
-    stroke(ico, accentColor, 1, 0.3)
 
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1,-115,0,18)
@@ -702,7 +652,6 @@ local function toggleCard(parent, iconText, titleText, descText, accentColor, or
     track.ZIndex = c.ZIndex+2
     track.Parent = c
     corner(track, 11)
-    stroke(track, Color3.fromRGB(50,54,80), 1)
 
     local knob = Instance.new("Frame")
     knob.Size = UDim2.new(0,16,0,16)
@@ -791,7 +740,10 @@ local function buttonCard(parent, iconText, titleText, descText, accentColor, or
     ab.MouseLeave:Connect(function() tween(ab,{BackgroundTransparency=0},0.15) end)
     ab.MouseButton1Click:Connect(function()
         tween(ab,{BackgroundTransparency=0.6},0.08)
-        task.delay(0.12, function() tween(ab,{BackgroundTransparency=0},0.15) end)
+        coroutine.wrap(function()
+            wait(0.12)
+            tween(ab,{BackgroundTransparency=0},0.15)
+        end)()
     end)
     return c
 end
@@ -864,7 +816,6 @@ local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, acc
     thumb.ZIndex = c.ZIndex+4
     thumb.Parent = trackBg
     corner(thumb, 99)
-    stroke(thumb, accentColor, 2)
 
     local draggingSlider = false
     local sliderBtn = Instance.new("TextButton")
@@ -893,8 +844,10 @@ local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, acc
     end)
 
     UserInputService.InputChanged:Connect(function(inp)
-        if draggingSlider and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-            updateSlider(inp.Position.X)
+        if draggingSlider then
+            if inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch then
+                updateSlider(inp.Position.X)
+            end
         end
     end)
 
@@ -944,7 +897,6 @@ local function dropdownCard(parent, iconText, titleText, options, accentColor, o
     dropBox.ZIndex = c.ZIndex+2
     dropBox.Parent = c
     corner(dropBox, 7)
-    stroke(dropBox, Color3.fromRGB(50,54,80), 1)
 
     local selectedIdx = 1
     local selLabel = Instance.new("TextLabel")
@@ -980,7 +932,10 @@ local function dropdownCard(parent, iconText, titleText, options, accentColor, o
     db.MouseButton1Click:Connect(function()
         selectedIdx = selectedIdx % #options + 1
         selLabel.Text = options[selectedIdx]
-        tween(arr, {Rotation = arr.Rotation == 0 and 180 or 0}, 0.2)
+        
+        local newRot = 0
+        if arr.Rotation == 0 then newRot = 180 end
+        tween(arr, {Rotation = newRot}, 0.2)
     end)
 
     return c
@@ -1016,7 +971,6 @@ for i, sd in ipairs(statDefs) do
     sf.LayoutOrder = i
     sf.Parent = statRow
     corner(sf, 10)
-    stroke(sf, Color3.fromRGB(38,42,68), 1)
 
     local sico = Instance.new("TextLabel")
     sico.Size = UDim2.new(1,0,0,26)
@@ -1057,50 +1011,18 @@ end
 sectionHeader(PgMain, "◈ БЫСТРЫЕ ДЕЙСТВИЯ", 3)
 toggleCard(PgMain, "🔔", "Уведомления", "Показывать системные сообщения", CFG.Accent, 4)
 buttonCard(PgMain, "🔄", "Обновить хаб", "Перезагрузить все модули", CFG.Yellow, 5)
-buttonCard(PgMain, "📋", "Копировать лог", "Экспорт журнала событий", CFG.Purple, 6)
 
 sectionHeader(PgCombat, "◈ ЦЕЛЬ И АИМ", 1)
 toggleCard(PgCombat, "🎯", "Aimbot", "Автоматическое наведение на цель", CFG.Red, 2)
-toggleCard(PgCombat, "🔫", "Silent Aim", "Скрытый aimbot без видимой цели", CFG.Red, 3)
 sliderCard(PgCombat, "📐", "FOV прицела", 1, 360, 90, CFG.Red, 4)
-sliderCard(PgCombat, "🚀", "Smoothness", 1, 100, 50, CFG.Orange or CFG.Yellow, 5)
-
-sectionHeader(PgCombat, "◈ АТАКА", 6)
-toggleCard(PgCombat, "💥", "Infinite Ammo", "Бесконечные патроны", CFG.Yellow, 7)
-toggleCard(PgCombat, "⚡", "Rapid Fire", "Максимальная скорострельность", CFG.Yellow, 8)
-dropdownCard(PgCombat, "🎯","Часть тела", {"Голова","Грудь","Шея","Торс"}, CFG.Red, 9)
 
 sectionHeader(PgVisuals, "◈ ESP", 1)
 toggleCard(PgVisuals, "📦", "ESP Boxes", "Рамки вокруг игроков", CFG.Purple, 2)
 toggleCard(PgVisuals, "↗️", "ESP Tracers", "Линии трассировки до игроков", CFG.Purple, 3)
-toggleCard(PgVisuals, "🏷️", "ESP Имена", "Имена игроков в пространстве", CFG.Purple, 4)
-toggleCard(PgVisuals, "❤️", "ESP Здоровье", "Полоска здоровья над головой", CFG.Red, 5)
-
-sectionHeader(PgVisuals, "◈ МИРОВЫЕ ЭФФЕКТЫ", 6)
-toggleCard(PgVisuals, "🌟", "Full Bright", "Максимальная яркость карты", CFG.Yellow, 7)
-toggleCard(PgVisuals, "🌈", "Rainbow Noclip", "Визуальный эффект прозрачности", CFG.Accent, 8)
-dropdownCard(PgVisuals,"🎨","Цвет ESP", {"Голубой","Красный","Зелёный","Белый"}, CFG.Purple, 9)
 
 sectionHeader(PgPlayer, "◈ ДВИЖЕНИЕ", 1)
 toggleCard(PgPlayer, "🏃", "Speed Hack", "Увеличенная скорость бега", CFG.Green, 2)
 sliderCard(PgPlayer, "⚡", "WalkSpeed", 1, 500, 16, CFG.Green, 3)
-toggleCard(PgPlayer, "🦘", "High Jump", "Увеличенная высота прыжка", CFG.Accent, 4)
-sliderCard(PgPlayer, "↑", "JumpPower", 1, 500, 50, CFG.Accent, 5)
-
-sectionHeader(PgPlayer, "◈ ФИЗИКА", 6)
-toggleCard(PgPlayer, "👻", "Noclip", "Полёт сквозь стены", CFG.Yellow, 7)
-toggleCard(PgPlayer, "🕊️", "Anti-Gravity", "Уменьшение гравитации", CFG.Purple, 8)
-sliderCard(PgPlayer, "🌍", "Gravity", 0, 200, 100, CFG.Purple, 9)
-
-sectionHeader(PgMisc, "◈ СИСТЕМА", 1)
-buttonCard(PgMisc, "🔑", "Получить ключ", "Запрос лицензионного ключа", CFG.Yellow, 2)
-buttonCard(PgMisc, "📡", "Проверить VPN", "Тест соединения и анонимности", CFG.Green, 3)
-buttonCard(PgMisc, "🗑️", "Сброс настроек", "Вернуть все значения по умолчанию", CFG.Red, 4)
-
-sectionHeader(PgMisc, "◈ ИНТЕРФЕЙС", 5)
-dropdownCard(PgMisc, "🎨","Тема оформления", {"Cyan","Purple","Red","Green"}, CFG.Accent, 6)
-toggleCard(PgMisc, "✨", "Партиклы", "Фоновые анимированные частицы", CFG.Purple, 7)
-toggleCard(PgMisc, "📌", "Плавающая кнопка","Кнопка открытия хаба", CFG.Accent, 8)
 
 ----------------------------------------------------------------
 -- [НИЖНЯЯ ПАНЕЛЬ СТАТУСА]
@@ -1113,17 +1035,11 @@ Footer.BorderSizePixel = 0
 Footer.ZIndex = 22
 Footer.Parent = MainFrame
 
-local FooterStroke = Instance.new("UIStroke")
-FooterStroke.Color = Color3.fromRGB(35,38,62)
-FooterStroke.Thickness = 1
-FooterStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-FooterStroke.Parent = Footer
-
 local FooterText = Instance.new("TextLabel")
 FooterText.Size = UDim2.new(0.6,0,1,0)
 FooterText.Position = UDim2.new(0,10,0,0)
 FooterText.BackgroundTransparency = 1
-FooterText.Text = "Nexus Hub • Build 2024.12"
+FooterText.Text = "Nexus Hub • Safe Mode"
 FooterText.TextSize = 9
 FooterText.Font = Enum.Font.Gotham
 FooterText.TextColor3 = CFG.TextMuted
@@ -1144,16 +1060,31 @@ PingLabel.ZIndex = 23
 PingLabel.Parent = Footer
 padding(Footer, 0,0,0,0,10)
 
-task.spawn(function()
-    while task.wait(2) do
+coroutine.wrap(function()
+    while true do
+        wait(2)
         local ok, p = pcall(function()
-            return Players.LocalPlayer:GetNetworkPing and math.floor(Players.LocalPlayer:GetNetworkPing()*1000) or 0
+            if Players.LocalPlayer:GetNetworkPing() then
+                return math.floor(Players.LocalPlayer:GetNetworkPing() * 1000)
+            end
+            return 0
         end)
-        local ms = ok and p or 0
+        
+        local ms = 0
+        if ok and p then 
+            ms = p 
+        end
+        
         PingLabel.Text = "ping: "..ms.." ms"
-        PingLabel.TextColor3 = ms < 80 and CFG.Green or ms < 150 and CFG.Yellow or CFG.Red
+        if ms < 80 then
+            PingLabel.TextColor3 = CFG.Green
+        elseif ms < 150 then
+            PingLabel.TextColor3 = CFG.Yellow
+        else
+            PingLabel.TextColor3 = CFG.Red
+        end
     end
-end)
+end)()
 
 ----------------------------------------------------------------
 -- [ЛОГИКА КНОПОК УПРАВЛЕНИЯ ОКНОМ]
@@ -1173,7 +1104,10 @@ local function openHub()
     }, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
     tween(FB, {BackgroundTransparency=1}, 0.2)
-    task.delay(0.25, function() FB.Visible = false end)
+    coroutine.wrap(function()
+        wait(0.25)
+        FB.Visible = false
+    end)()
 end
 
 local function closeHub()
@@ -1183,11 +1117,12 @@ local function closeHub()
         Position = UDim2.new(0.5,0,0.5,0)
     }, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
 
-    task.delay(0.3, function()
+    coroutine.wrap(function()
+        wait(0.3)
         MainFrame.Visible = false
         FB.Visible = true
         tween(FB, {BackgroundTransparency=0}, 0.2)
-    end)
+    end)()
 end
 
 FB.MouseButton1Click:Connect(openHub)
@@ -1202,19 +1137,26 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-task.delay(0.5, openHub)
+coroutine.wrap(function()
+    wait(0.5)
+    openHub()
+end)()
 
 ----------------------------------------------------------------
 -- [АНИМАЦИЯ ЧАСТИЦ ФОНА ПО ОТКРЫТИЮ]
 ----------------------------------------------------------------
 local function burstParticles()
     for i = 1, 8 do
-        task.delay(i*0.04, function()
-            local vp = workspace.CurrentCamera.ViewportSize
+        coroutine.wrap(function()
+            wait(i * 0.04)
             local p = Instance.new("Frame")
             p.Size = UDim2.new(0,4,0,4)
             p.Position = UDim2.new(0.5, math.random(-20,20), 0.5, math.random(-20,20))
-            p.BackgroundColor3 = i%2==0 and CFG.Accent or CFG.Purple
+            
+            local bgCol = CFG.Purple
+            if i % 2 == 0 then bgCol = CFG.Accent end
+            p.BackgroundColor3 = bgCol
+            
             p.BackgroundTransparency = 0.3
             p.BorderSizePixel = 0
             p.ZIndex = 5
@@ -1230,8 +1172,11 @@ local function burstParticles()
                 Size = UDim2.new(0,1,0,1)
             }, 0.6, Enum.EasingStyle.Quad)
 
-            task.delay(0.65, function() p:Destroy() end)
-        end)
+            coroutine.wrap(function()
+                wait(0.65)
+                p:Destroy()
+            end)()
+        end)()
     end
 end
 
