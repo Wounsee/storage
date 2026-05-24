@@ -1,4 +1,4 @@
--- [[ NEXUS M — ULTRA RESPONSIVE GLASSMORPHISM HUB ]]
+-- [[ NEXUS M — ULTRA RESPONSIVE GLASSMORPHISM HUB ]] --
 -- Developer: Colin | Full Mobile/PC Adaptive UI
 
 local TweenService = game:GetService("TweenService")
@@ -7,30 +7,32 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-if PlayerGui:FindFirstChild("NexusHub_V2") then
-    PlayerGui.NexusHub_V2:Destroy()
+-- [ ЗАЩИТА: Прячем GUI от проверок игры ]
+local TargetGui = (gethui and gethui()) or game:GetService("CoreGui") or LocalPlayer:WaitForChild("PlayerGui")
+
+if TargetGui:FindFirstChild("NexusHub_V2") then 
+    TargetGui.NexusHub_V2:Destroy() 
 end
 
 ----------------------------------------------------------------
 -- [КОНФИГ]
 ----------------------------------------------------------------
 local CFG = {
-    Accent       = Color3.fromRGB(0, 195, 255),
-    AccentDark   = Color3.fromRGB(0, 120, 180),
-    AccentGlow   = Color3.fromRGB(0, 210, 255),
-    BgDeep       = Color3.fromRGB(6, 7, 12),
-    BgCard       = Color3.fromRGB(11, 13, 22),
-    BgGlass      = Color3.fromRGB(18, 20, 32),
-    BgGlass2     = Color3.fromRGB(22, 25, 40),
-    TextPrimary  = Color3.fromRGB(240, 242, 255),
-    TextSecond   = Color3.fromRGB(130, 135, 165),
-    TextMuted    = Color3.fromRGB(70, 75, 100),
-    Red          = Color3.fromRGB(255, 70, 100),
-    Green        = Color3.fromRGB(50, 220, 130),
-    Yellow       = Color3.fromRGB(255, 200, 50),
-    Purple       = Color3.fromRGB(155, 90, 255),
+    Accent = Color3.fromRGB(0, 195, 255),
+    AccentDark = Color3.fromRGB(0, 120, 180),
+    AccentGlow = Color3.fromRGB(0, 210, 255),
+    BgDeep = Color3.fromRGB(6, 7, 12),
+    BgCard = Color3.fromRGB(11, 13, 22),
+    BgGlass = Color3.fromRGB(18, 20, 32),
+    BgGlass2 = Color3.fromRGB(22, 25, 40),
+    TextPrimary = Color3.fromRGB(240, 242, 255),
+    TextSecond = Color3.fromRGB(130, 135, 165),
+    TextMuted = Color3.fromRGB(70, 75, 100),
+    Red = Color3.fromRGB(255, 70, 100),
+    Green = Color3.fromRGB(50, 220, 130),
+    Yellow = Color3.fromRGB(255, 200, 50),
+    Purple = Color3.fromRGB(155, 90, 255),
 }
 
 local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
@@ -43,14 +45,14 @@ ScreenGui.Name = "NexusHub_V2"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.IgnoreGuiInset = true
-ScreenGui.Parent = PlayerGui
+ScreenGui.Parent = TargetGui
 
 ----------------------------------------------------------------
 -- [УТИЛИТЫ]
 ----------------------------------------------------------------
 local function tween(obj, props, t, style, dir)
     style = style or Enum.EasingStyle.Quart
-    dir   = dir   or Enum.EasingDirection.Out
+    dir = dir or Enum.EasingDirection.Out
     TweenService:Create(obj, TweenInfo.new(t or 0.25, style, dir), props):Play()
 end
 
@@ -81,10 +83,10 @@ end
 
 local function padding(parent, all, top, bottom, left, right)
     local p = Instance.new("UIPadding")
-    p.PaddingTop    = UDim.new(0, top    or all or 0)
+    p.PaddingTop = UDim.new(0, top or all or 0)
     p.PaddingBottom = UDim.new(0, bottom or all or 0)
-    p.PaddingLeft   = UDim.new(0, left   or all or 0)
-    p.PaddingRight  = UDim.new(0, right  or all or 0)
+    p.PaddingLeft = UDim.new(0, left or all or 0)
+    p.PaddingRight = UDim.new(0, right or all or 0)
     p.Parent = parent
     return p
 end
@@ -108,17 +110,22 @@ end
 ----------------------------------------------------------------
 local function makeDraggable(handle, target)
     local dragging, dStart, tStart = false, nil, nil
+
     local function onInputBegan(inp)
         local t = inp.UserInputType
         if t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch then
             dragging = true
-            dStart   = inp.Position
-            tStart   = target.Position
+            dStart = inp.Position
+            tStart = target.Position
+
             inp.Changed:Connect(function()
-                if inp.UserInputState == Enum.UserInputState.End then dragging = false end
+                if inp.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
             end)
         end
     end
+
     local function onInputChanged(inp)
         local t = inp.UserInputType
         if dragging and (t == Enum.UserInputType.MouseMovement or t == Enum.UserInputType.Touch) then
@@ -129,6 +136,7 @@ local function makeDraggable(handle, target)
             )
         end
     end
+
     handle.InputBegan:Connect(onInputBegan)
     UserInputService.InputChanged:Connect(onInputChanged)
 end
@@ -146,8 +154,8 @@ ParticleCanvas.Parent = ScreenGui
 local particles = {}
 local function spawnParticle()
     local vp = workspace.CurrentCamera.ViewportSize
-    local p  = Instance.new("Frame")
-    p.Size   = UDim2.new(0, math.random(2,5), 0, math.random(2,5))
+    local p = Instance.new("Frame")
+    p.Size = UDim2.new(0, math.random(2,5), 0, math.random(2,5))
     p.Position = UDim2.new(math.random(), 0, math.random(), 0)
     p.BackgroundColor3 = math.random() > 0.5 and CFG.Accent or CFG.Purple
     p.BackgroundTransparency = math.random(60,90)/100
@@ -155,12 +163,14 @@ local function spawnParticle()
     p.ZIndex = 1
     corner(p, 99)
     p.Parent = ParticleCanvas
-    local life   = math.random(4,10)
+
+    local life = math.random(4,10)
     local startT = tick()
     local startX = p.Position.X.Scale
     local startY = p.Position.Y.Scale
     local driftX = (math.random()-0.5)*0.08
     local driftY = -math.random(2,5)*0.01
+
     table.insert(particles, {frame=p, startT=startT, life=life, sx=startX, sy=startY, dx=driftX, dy=driftY})
 end
 
@@ -190,18 +200,17 @@ end)
 -- [FLOATING BUTTON — мобильная кнопка открытия]
 ----------------------------------------------------------------
 local FB = Instance.new("TextButton")
-FB.Name      = "FloatBtn"
-FB.Size      = UDim2.new(0, 52, 0, 52)
-FB.Position  = UDim2.new(0, 16, 0.45, 0)
+FB.Name = "FloatBtn"
+FB.Size = UDim2.new(0, 52, 0, 52)
+FB.Position = UDim2.new(0, 16, 0.45, 0)
 FB.BackgroundColor3 = CFG.BgDeep
-FB.Text      = ""
+FB.Text = ""
 FB.AutoButtonColor = false
-FB.ZIndex    = 10
-FB.Parent    = ScreenGui
+FB.ZIndex = 10
+FB.Parent = ScreenGui
 corner(FB, 16)
 stroke(FB, CFG.Accent, 1.5)
 
--- Иконка внутри кнопки
 local FBIcon = Instance.new("TextLabel")
 FBIcon.Size = UDim2.new(1,0,1,0)
 FBIcon.BackgroundTransparency = 1
@@ -214,7 +223,6 @@ FBIcon.TextYAlignment = Enum.TextYAlignment.Center
 FBIcon.ZIndex = 11
 FBIcon.Parent = FB
 
--- Пульсирующее свечение кнопки
 local FBGlow = Instance.new("Frame")
 FBGlow.Size = UDim2.new(1, 20, 1, 20)
 FBGlow.Position = UDim2.new(0, -10, 0, -10)
@@ -226,12 +234,11 @@ corner(FBGlow, 20)
 
 makeDraggable(FB, FB)
 
--- Анимация пульсации
 task.spawn(function()
     while true do
-        tween(FBGlow, {BackgroundTransparency=0.7,  Size=UDim2.new(1,26,1,26), Position=UDim2.new(0,-13,0,-13)}, 0.9, Enum.EasingStyle.Sine)
+        tween(FBGlow, {BackgroundTransparency=0.7, Size=UDim2.new(1,26,1,26), Position=UDim2.new(0,-13,0,-13)}, 0.9, Enum.EasingStyle.Sine)
         task.wait(0.9)
-        tween(FBGlow, {BackgroundTransparency=0.92, Size=UDim2.new(1,14,1,14), Position=UDim2.new(0,-7, 0,-7)},  0.9, Enum.EasingStyle.Sine)
+        tween(FBGlow, {BackgroundTransparency=0.92, Size=UDim2.new(1,14,1,14), Position=UDim2.new(0,-7, 0,-7)}, 0.9, Enum.EasingStyle.Sine)
         task.wait(0.9)
     end
 end)
@@ -239,40 +246,35 @@ end)
 ----------------------------------------------------------------
 -- [ГЛАВНОЕ ОКНО]
 ----------------------------------------------------------------
-local W  = isMobile and 360 or 560
-local H  = isMobile and 440 or 340
+local W = isMobile and 360 or 560
+local H = isMobile and 440 or 340
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Name  = "MainFrame"
-MainFrame.Size  = UDim2.new(0, W, 0, H)
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, W, 0, H)
 MainFrame.Position = UDim2.new(0.5, -W/2, 0.5, -H/2)
 MainFrame.BackgroundColor3 = CFG.BgDeep
-MainFrame.BorderSizePixel  = 0
+MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
-MainFrame.Visible  = false
-MainFrame.ZIndex   = 20
-MainFrame.Parent   = ScreenGui
+MainFrame.Visible = false
+MainFrame.ZIndex = 20
+MainFrame.Parent = ScreenGui
 corner(MainFrame, 18)
 stroke(MainFrame, Color3.fromRGB(35, 38, 60), 1)
 
--- Фоновый градиент
-gradient(MainFrame,
-    Color3.fromRGB(10, 11, 20),
-    Color3.fromRGB(14, 16, 28), 135)
+gradient(MainFrame, Color3.fromRGB(10, 11, 20), Color3.fromRGB(14, 16, 28), 135)
 
--- Тонкая цветная полоска сверху (accent bar)
 local AccentBar = Instance.new("Frame")
-AccentBar.Size  = UDim2.new(1, 0, 0, 2)
+AccentBar.Size = UDim2.new(1, 0, 0, 2)
 AccentBar.Position = UDim2.new(0, 0, 0, 0)
 AccentBar.BackgroundColor3 = CFG.Accent
-AccentBar.BorderSizePixel  = 0
+AccentBar.BorderSizePixel = 0
 AccentBar.ZIndex = 22
 AccentBar.Parent = MainFrame
 gradient(AccentBar, CFG.Accent, CFG.Purple, 0)
 
--- Фоновый блик (glassmorphism highlight)
 local GlassHighlight = Instance.new("Frame")
-GlassHighlight.Size  = UDim2.new(0.7, 0, 0.4, 0)
+GlassHighlight.Size = UDim2.new(0.7, 0, 0.4, 0)
 GlassHighlight.Position = UDim2.new(-0.1, 0, -0.2, 0)
 GlassHighlight.BackgroundColor3 = CFG.Accent
 GlassHighlight.BackgroundTransparency = 0.93
@@ -288,12 +290,11 @@ corner(GlassHighlight, 80)
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 52)
 Header.BackgroundColor3 = CFG.BgGlass
-Header.BorderSizePixel  = 0
+Header.BorderSizePixel = 0
 Header.ZIndex = 23
 Header.Parent = MainFrame
 corner(Header, 18)
 
--- Нижние углы шапки выравниваем (убираем скругление снизу)
 local HeaderBotCover = Instance.new("Frame")
 HeaderBotCover.Size = UDim2.new(1,0,0,18)
 HeaderBotCover.Position = UDim2.new(0,0,1,-18)
@@ -303,12 +304,11 @@ HeaderBotCover.ZIndex = 23
 HeaderBotCover.Parent = Header
 
 local HeaderStroke = Instance.new("UIStroke")
-HeaderStroke.Color     = Color3.fromRGB(40, 44, 70)
+HeaderStroke.Color = Color3.fromRGB(40, 44, 70)
 HeaderStroke.Thickness = 1
 HeaderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 HeaderStroke.Parent = Header
 
--- Логотип / иконка
 local LogoCircle = Instance.new("Frame")
 LogoCircle.Size = UDim2.new(0, 32, 0, 32)
 LogoCircle.Position = UDim2.new(0, 12, 0.5, -16)
@@ -331,7 +331,6 @@ LogoIcon.TextYAlignment = Enum.TextYAlignment.Center
 LogoIcon.ZIndex = 25
 LogoIcon.Parent = LogoCircle
 
--- Название
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(0, 120, 0, 22)
 TitleLabel.Position = UDim2.new(0, 52, 0, 8)
@@ -348,7 +347,7 @@ local SubLabel = Instance.new("TextLabel")
 SubLabel.Size = UDim2.new(0, 120, 0, 14)
 SubLabel.Position = UDim2.new(0, 52, 0, 30)
 SubLabel.BackgroundTransparency = 1
-SubLabel.Text = "Universal Hub  v2.0"
+SubLabel.Text = "Universal Hub v2.0"
 SubLabel.TextSize = 10
 SubLabel.Font = Enum.Font.Gotham
 SubLabel.TextColor3 = CFG.TextMuted
@@ -356,7 +355,6 @@ SubLabel.TextXAlignment = Enum.TextXAlignment.Left
 SubLabel.ZIndex = 24
 SubLabel.Parent = Header
 
--- Статус-бейдж
 local Badge = Instance.new("Frame")
 Badge.Size = UDim2.new(0, 64, 0, 20)
 Badge.Position = UDim2.new(0, 178, 0.5, -10)
@@ -387,15 +385,14 @@ BadgeText.TextXAlignment = Enum.TextXAlignment.Left
 BadgeText.ZIndex = 25
 BadgeText.Parent = Badge
 
--- Кнопки управления окном
 local function makeWinBtn(icon, posX, bgColor, iconColor)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 26, 0, 26)
     btn.Position = UDim2.new(1, posX, 0.5, -13)
     btn.BackgroundColor3 = bgColor
-    btn.Text  = icon
+    btn.Text = icon
     btn.TextSize = 11
-    btn.Font  = Enum.Font.GothamBold
+    btn.Font = Enum.Font.GothamBold
     btn.TextColor3 = iconColor
     btn.AutoButtonColor = false
     btn.ZIndex = 26
@@ -406,7 +403,7 @@ local function makeWinBtn(icon, posX, bgColor, iconColor)
     return btn
 end
 
-local CloseBtn    = makeWinBtn("✕", -12, Color3.fromRGB(60,20,25), CFG.Red)
+local CloseBtn = makeWinBtn("✕", -12, Color3.fromRGB(60,20,25), CFG.Red)
 local MinimizeBtn = makeWinBtn("−", -44, Color3.fromRGB(50,45,15), CFG.Yellow)
 
 makeDraggable(Header, MainFrame)
@@ -415,23 +412,21 @@ makeDraggable(Header, MainFrame)
 -- [БОКОВАЯ ПАНЕЛЬ]
 ----------------------------------------------------------------
 local SidebarW = isMobile and 54 or 150
-
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, SidebarW, 1, -52)
 Sidebar.Position = UDim2.new(0, 0, 0, 52)
 Sidebar.BackgroundColor3 = CFG.BgGlass
-Sidebar.BorderSizePixel  = 0
+Sidebar.BorderSizePixel = 0
 Sidebar.ZIndex = 22
 Sidebar.Parent = MainFrame
 
 local SideStroke = Instance.new("UIStroke")
-SideStroke.Color     = Color3.fromRGB(35,38,62)
+SideStroke.Color = Color3.fromRGB(35,38,62)
 SideStroke.Thickness = 1
 SideStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 SideStroke.Parent = Sidebar
 
--- Вертикальный разделитель
 local Divider = Instance.new("Frame")
 Divider.Size = UDim2.new(0, 1, 1, -52)
 Divider.Position = UDim2.new(0, SidebarW, 0, 52)
@@ -450,7 +445,6 @@ padding(Sidebar, 8)
 -- [КОНТЕНТНАЯ ОБЛАСТЬ]
 ----------------------------------------------------------------
 local ContentW = W - SidebarW - 1
-
 local ContentArea = Instance.new("Frame")
 ContentArea.Name = "ContentArea"
 ContentArea.Size = UDim2.new(0, ContentW, 1, -52)
@@ -462,8 +456,7 @@ ContentArea.Parent = MainFrame
 ----------------------------------------------------------------
 -- [СТРАНИЦЫ]
 ----------------------------------------------------------------
-local Pages     = {}
-local PageMeta  = {}
+local Pages = {}
 
 local function makePage(id)
     local Page = Instance.new("ScrollingFrame")
@@ -472,50 +465,56 @@ local function makePage(id)
     Page.BackgroundTransparency = 1
     Page.CanvasSize = UDim2.new(0,0,0,0)
     Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    Page.ScrollBarThickness  = 2
+    Page.ScrollBarThickness = 2
     Page.ScrollBarImageColor3 = CFG.Accent
-    Page.ScrollingDirection  = Enum.ScrollingDirection.Y
+    Page.ScrollingDirection = Enum.ScrollingDirection.Y
     Page.Visible = false
-    Page.ZIndex  = 23
-    Page.Parent  = ContentArea
+    Page.ZIndex = 23
+    Page.Parent = ContentArea
 
     local List = Instance.new("UIListLayout")
     List.Parent = Page
     List.Padding = UDim.new(0, 6)
     List.SortOrder = Enum.SortOrder.LayoutOrder
-    padding(Page, 10, 10, 10, 8, 8)
 
+    padding(Page, 10, 10, 10, 8, 8)
     Pages[id] = Page
     return Page
 end
 
-local PgMain    = makePage("main")
-local PgCombat  = makePage("combat")
+local PgMain = makePage("main")
+local PgCombat = makePage("combat")
 local PgVisuals = makePage("visuals")
-local PgPlayer  = makePage("player")
-local PgMisc    = makePage("misc")
+local PgPlayer = makePage("player")
+local PgMisc = makePage("misc")
 
 local activePage = nil
-local activeTab  = nil
+local activeTab = nil
 
-local function switchPage(id, tabBtn)
-    if activeTab  then
-        tween(activeTab._bg,   {BackgroundColor3 = Color3.fromRGB(0,0,0), BackgroundTransparency=1}, 0.2)
-        tween(activeTab._icon, {TextColor3 = CFG.TextMuted}, 0.2)
-        if activeTab._lbl then
-            tween(activeTab._lbl, {TextColor3 = CFG.TextMuted}, 0.2)
+local function switchPage(id, tabData)
+    if activeTab then
+        tween(activeTab.bg, {BackgroundColor3 = Color3.fromRGB(0,0,0), BackgroundTransparency=1}, 0.2)
+        tween(activeTab.icon, {TextColor3 = CFG.TextMuted}, 0.2)
+        if activeTab.lbl then
+            tween(activeTab.lbl, {TextColor3 = CFG.TextMuted}, 0.2)
         end
     end
+
     if activePage then
         activePage.Visible = false
     end
+
     activePage = Pages[id]
-    activeTab  = tabBtn
-    if activePage then activePage.Visible = true end
-    tween(tabBtn._bg,   {BackgroundColor3 = Color3.fromRGB(0,120,160), BackgroundTransparency=0.7}, 0.2)
-    tween(tabBtn._icon, {TextColor3 = CFG.Accent}, 0.2)
-    if tabBtn._lbl then
-        tween(tabBtn._lbl, {TextColor3 = CFG.TextPrimary}, 0.2)
+    activeTab = tabData
+
+    if activePage then
+        activePage.Visible = true
+    end
+
+    tween(tabData.bg, {BackgroundColor3 = Color3.fromRGB(0,120,160), BackgroundTransparency=0.7}, 0.2)
+    tween(tabData.icon, {TextColor3 = CFG.Accent}, 0.2)
+    if tabData.lbl then
+        tween(tabData.lbl, {TextColor3 = CFG.TextPrimary}, 0.2)
     end
 end
 
@@ -523,20 +522,18 @@ end
 -- [СОЗДАНИЕ ВКЛАДКИ (TAB BUTTON)]
 ----------------------------------------------------------------
 local tabDefs = {
-    {id="main",    icon="🏠", label="Главная",  color=CFG.Accent},
-    {id="combat",  icon="⚔️",  label="Бой",      color=CFG.Red},
-    {id="visuals", icon="👁",  label="Визуал",   color=CFG.Purple},
-    {id="player",  icon="🏃",  label="Игрок",    color=CFG.Green},
-    {id="misc",    icon="⚙️",  label="Прочее",   color=CFG.Yellow},
+    {id="main", icon="🏠", label="Главная", color=CFG.Accent},
+    {id="combat", icon="⚔️", label="Бой", color=CFG.Red},
+    {id="visuals", icon="👁", label="Визуал", color=CFG.Purple},
+    {id="player", icon="🏃", label="Игрок", color=CFG.Green},
+    {id="misc", icon="⚙️", label="Прочее", color=CFG.Yellow},
 }
 
 local tabButtons = {}
 
 for i, def in ipairs(tabDefs) do
     local btn = Instance.new("TextButton")
-    btn.Size = isMobile
-        and UDim2.new(1, 0, 0, 44)
-        or  UDim2.new(1, 0, 0, 38)
+    btn.Size = isMobile and UDim2.new(1, 0, 0, 44) or UDim2.new(1, 0, 0, 38)
     btn.BackgroundTransparency = 1
     btn.Text = ""
     btn.AutoButtonColor = false
@@ -545,7 +542,6 @@ for i, def in ipairs(tabDefs) do
     btn.LayoutOrder = i
     corner(btn, 10)
 
-    -- фон-подложка вкладки
     local bg = Instance.new("Frame")
     bg.Size = UDim2.new(1,0,1,0)
     bg.BackgroundColor3 = Color3.fromRGB(0,120,160)
@@ -555,7 +551,6 @@ for i, def in ipairs(tabDefs) do
     bg.Parent = btn
     corner(bg, 10)
 
-    -- иконка
     local ico = Instance.new("TextLabel")
     ico.BackgroundTransparency = 1
     ico.TextColor3 = CFG.TextMuted
@@ -565,6 +560,7 @@ for i, def in ipairs(tabDefs) do
     ico.Text = def.icon
 
     local lbl = nil
+
     if not isMobile then
         ico.Size = UDim2.new(0, 28, 1, 0)
         ico.Position = UDim2.new(0, 6, 0, 0)
@@ -589,20 +585,28 @@ for i, def in ipairs(tabDefs) do
         ico.TextXAlignment = Enum.TextXAlignment.Center
     end
 
-    btn._bg   = bg
-    btn._icon = ico
-    btn._lbl  = lbl
-    btn._id   = def.id
-    tabButtons[def.id] = btn
+    -- Упаковываем элементы вкладки в таблицу
+    local tabData = {
+        button = btn,
+        bg = bg,
+        icon = ico,
+        lbl = lbl,
+        id = def.id
+    }
+    tabButtons[def.id] = tabData
 
-    btn.MouseButton1Click:Connect(function() switchPage(def.id, btn) end)
+    btn.MouseButton1Click:Connect(function()
+        switchPage(def.id, tabData)
+    end)
+
     btn.MouseEnter:Connect(function()
-        if btn ~= activeTab then
+        if tabData ~= activeTab then
             tween(bg, {BackgroundTransparency=0.88}, 0.15)
         end
     end)
+
     btn.MouseLeave:Connect(function()
-        if btn ~= activeTab then
+        if tabData ~= activeTab then
             tween(bg, {BackgroundTransparency=1}, 0.15)
         end
     end)
@@ -614,34 +618,28 @@ switchPage("main", tabButtons["main"])
 ----------------------------------------------------------------
 -- [КОМПОНЕНТЫ КАРТОЧЕК]
 ----------------------------------------------------------------
-
--- Секционный заголовок
 local function sectionHeader(parent, text, order)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, 0, 0, 22)
     f.BackgroundTransparency = 1
     f.LayoutOrder = order or 0
     f.Parent = parent
-
     local l = label(f, text, 10, Enum.Font.GothamBold, CFG.TextMuted)
     l.TextXAlignment = Enum.TextXAlignment.Left
     padding(f, 0, 0, 0, 4, 0)
-
     return f
 end
 
--- Стеклянная карточка
 local function card(parent, height, order)
     local f = Instance.new("Frame")
     f.Size = UDim2.new(1, 0, 0, height)
     f.BackgroundColor3 = CFG.BgGlass2
-    f.BorderSizePixel  = 0
+    f.BorderSizePixel = 0
     f.LayoutOrder = order or 0
     f.Parent = parent
     corner(f, 10)
     stroke(f, Color3.fromRGB(38, 42, 68), 1, 0)
 
-    -- тонкий глас-шайн сверху
     local shine = Instance.new("Frame")
     shine.Size = UDim2.new(1, -20, 0, 1)
     shine.Position = UDim2.new(0, 10, 0, 0)
@@ -650,11 +648,9 @@ local function card(parent, height, order)
     shine.BorderSizePixel = 0
     shine.ZIndex = f.ZIndex+1
     shine.Parent = f
-
     return f
 end
 
--- Кнопка переключателя (Toggle)
 local function toggleCard(parent, iconText, titleText, descText, accentColor, order)
     local c = card(parent, 62, order)
     local isOn = false
@@ -698,7 +694,6 @@ local function toggleCard(parent, iconText, titleText, descText, accentColor, or
     desc.ZIndex = c.ZIndex+2
     desc.Parent = c
 
-    -- Switch track
     local track = Instance.new("Frame")
     track.Size = UDim2.new(0, 42, 0, 22)
     track.Position = UDim2.new(1,-54,0.5,-11)
@@ -735,11 +730,9 @@ local function toggleCard(parent, iconText, titleText, descText, accentColor, or
             tween(knob, {Position=UDim2.new(0,3,0.5,-8), BackgroundColor3=Color3.fromRGB(140,145,180)}, 0.2)
         end
     end)
-
     return c
 end
 
--- Кнопка действия (Button)
 local function buttonCard(parent, iconText, titleText, descText, accentColor, order)
     local c = card(parent, 56, order)
 
@@ -781,7 +774,6 @@ local function buttonCard(parent, iconText, titleText, descText, accentColor, or
     desc.ZIndex = c.ZIndex+2
     desc.Parent = c
 
-    -- Action button
     local ab = Instance.new("TextButton")
     ab.Size = UDim2.new(0,54,0,26)
     ab.Position = UDim2.new(1,-64,0.5,-13)
@@ -801,11 +793,9 @@ local function buttonCard(parent, iconText, titleText, descText, accentColor, or
         tween(ab,{BackgroundTransparency=0.6},0.08)
         task.delay(0.12, function() tween(ab,{BackgroundTransparency=0},0.15) end)
     end)
-
     return c
 end
 
--- Слайдер
 local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, accentColor, order)
     local c = card(parent, 70, order)
     local value = defaultV
@@ -848,7 +838,6 @@ local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, acc
     valLbl.ZIndex = c.ZIndex+2
     valLbl.Parent = c
 
-    -- track
     local trackBg = Instance.new("Frame")
     trackBg.Size = UDim2.new(1,-20,0,5)
     trackBg.Position = UDim2.new(0,10,0,46)
@@ -877,7 +866,6 @@ local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, acc
     corner(thumb, 99)
     stroke(thumb, accentColor, 2)
 
-    -- drag logic
     local draggingSlider = false
     local sliderBtn = Instance.new("TextButton")
     sliderBtn.Size = UDim2.new(1,0,0,24)
@@ -889,7 +877,7 @@ local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, acc
 
     local function updateSlider(absX)
         local tbPos = trackBg.AbsolutePosition.X
-        local tbSz  = trackBg.AbsoluteSize.X
+        local tbSz = trackBg.AbsoluteSize.X
         local pct = math.clamp((absX - tbPos)/tbSz, 0, 1)
         value = math.floor(minV + (maxV-minV)*pct)
         valLbl.Text = tostring(value)
@@ -903,11 +891,13 @@ local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, acc
             updateSlider(inp.Position.X)
         end
     end)
+
     UserInputService.InputChanged:Connect(function(inp)
         if draggingSlider and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
             updateSlider(inp.Position.X)
         end
     end)
+
     UserInputService.InputEnded:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
             draggingSlider = false
@@ -917,7 +907,6 @@ local function sliderCard(parent, iconText, titleText, minV, maxV, defaultV, acc
     return c
 end
 
--- Дропдаун (stub красивый)
 local function dropdownCard(parent, iconText, titleText, options, accentColor, order)
     local c = card(parent, 58, order)
 
@@ -1000,10 +989,7 @@ end
 ----------------------------------------------------------------
 -- [НАПОЛНЕНИЕ СТРАНИЦ]
 ----------------------------------------------------------------
-
--- == ГЛАВНАЯ ==
-sectionHeader(PgMain, "◈  БЫСТРЫЙ ОБЗОР", 1)
-
+sectionHeader(PgMain, "◈ БЫСТРЫЙ ОБЗОР", 1)
 local statRow = Instance.new("Frame")
 statRow.Size = UDim2.new(1,0,0,66)
 statRow.BackgroundTransparency = 1
@@ -1017,10 +1003,11 @@ statList.Padding = UDim.new(0,6)
 statList.SortOrder = Enum.SortOrder.LayoutOrder
 
 local statDefs = {
-    {icon="⚡",label="Модулей",  val="5",      color=CFG.Accent},
-    {icon="🎯",label="Активных", val="0",      color=CFG.Green},
-    {icon="🔒",label="Статус",   val="OK",     color=CFG.Yellow},
+    {icon="⚡",label="Модулей", val="5", color=CFG.Accent},
+    {icon="🎯",label="Активных", val="0", color=CFG.Green},
+    {icon="🔒",label="Статус", val="OK", color=CFG.Yellow},
 }
+
 for i, sd in ipairs(statDefs) do
     local sf = Instance.new("Frame")
     sf.Size = UDim2.new(0.328,0,1,0)
@@ -1067,53 +1054,53 @@ for i, sd in ipairs(statDefs) do
     slbl.Parent = sf
 end
 
-sectionHeader(PgMain, "◈  БЫСТРЫЕ ДЕЙСТВИЯ", 3)
-toggleCard(PgMain,  "🔔", "Уведомления",     "Показывать системные сообщения",  CFG.Accent,  4)
-buttonCard(PgMain,  "🔄", "Обновить хаб",    "Перезагрузить все модули",         CFG.Yellow,  5)
-buttonCard(PgMain,  "📋", "Копировать лог",  "Экспорт журнала событий",          CFG.Purple,  6)
+sectionHeader(PgMain, "◈ БЫСТРЫЕ ДЕЙСТВИЯ", 3)
+toggleCard(PgMain, "🔔", "Уведомления", "Показывать системные сообщения", CFG.Accent, 4)
+buttonCard(PgMain, "🔄", "Обновить хаб", "Перезагрузить все модули", CFG.Yellow, 5)
+buttonCard(PgMain, "📋", "Копировать лог", "Экспорт журнала событий", CFG.Purple, 6)
 
--- == БОЙ ==
-sectionHeader(PgCombat, "◈  ЦЕЛЬ И АИМ", 1)
-toggleCard(PgCombat,  "🎯", "Aimbot",          "Автоматическое наведение на цель",  CFG.Red,    2)
-toggleCard(PgCombat,  "🔫", "Silent Aim",      "Скрытый aimbot без видимой цели",   CFG.Red,    3)
-sliderCard(PgCombat,  "📐", "FOV прицела",     1, 360, 90,  CFG.Red,    4)
-sliderCard(PgCombat,  "🚀", "Smoothness",      1, 100, 50,  CFG.Orange or CFG.Yellow, 5)
-sectionHeader(PgCombat, "◈  АТАКА", 6)
-toggleCard(PgCombat,  "💥", "Infinite Ammo",   "Бесконечные патроны",               CFG.Yellow, 7)
-toggleCard(PgCombat,  "⚡", "Rapid Fire",      "Максимальная скорострельность",     CFG.Yellow, 8)
-dropdownCard(PgCombat, "🎯","Часть тела",     {"Голова","Грудь","Шея","Торс"},     CFG.Red,    9)
+sectionHeader(PgCombat, "◈ ЦЕЛЬ И АИМ", 1)
+toggleCard(PgCombat, "🎯", "Aimbot", "Автоматическое наведение на цель", CFG.Red, 2)
+toggleCard(PgCombat, "🔫", "Silent Aim", "Скрытый aimbot без видимой цели", CFG.Red, 3)
+sliderCard(PgCombat, "📐", "FOV прицела", 1, 360, 90, CFG.Red, 4)
+sliderCard(PgCombat, "🚀", "Smoothness", 1, 100, 50, CFG.Orange or CFG.Yellow, 5)
 
--- == ВИЗУАЛ ==
-sectionHeader(PgVisuals, "◈  ESP", 1)
-toggleCard(PgVisuals, "📦", "ESP Boxes",       "Рамки вокруг игроков",              CFG.Purple, 2)
-toggleCard(PgVisuals, "↗️",  "ESP Tracers",     "Линии трассировки до игроков",      CFG.Purple, 3)
-toggleCard(PgVisuals, "🏷️",  "ESP Имена",       "Имена игроков в пространстве",      CFG.Purple, 4)
-toggleCard(PgVisuals, "❤️",  "ESP Здоровье",    "Полоска здоровья над головой",      CFG.Red,    5)
-sectionHeader(PgVisuals, "◈  МИРОВЫЕ ЭФФЕКТЫ", 6)
-toggleCard(PgVisuals, "🌟", "Full Bright",     "Максимальная яркость карты",        CFG.Yellow, 7)
-toggleCard(PgVisuals, "🌈", "Rainbow Noclip",  "Визуальный эффект прозрачности",    CFG.Accent, 8)
-dropdownCard(PgVisuals,"🎨","Цвет ESP",        {"Голубой","Красный","Зелёный","Белый"}, CFG.Purple, 9)
+sectionHeader(PgCombat, "◈ АТАКА", 6)
+toggleCard(PgCombat, "💥", "Infinite Ammo", "Бесконечные патроны", CFG.Yellow, 7)
+toggleCard(PgCombat, "⚡", "Rapid Fire", "Максимальная скорострельность", CFG.Yellow, 8)
+dropdownCard(PgCombat, "🎯","Часть тела", {"Голова","Грудь","Шея","Торс"}, CFG.Red, 9)
 
--- == ИГРОК ==
-sectionHeader(PgPlayer, "◈  ДВИЖЕНИЕ", 1)
-toggleCard(PgPlayer,  "🏃", "Speed Hack",      "Увеличенная скорость бега",         CFG.Green,  2)
-sliderCard(PgPlayer,  "⚡", "WalkSpeed",       1, 500, 16,  CFG.Green,  3)
-toggleCard(PgPlayer,  "🦘", "High Jump",       "Увеличенная высота прыжка",         CFG.Accent, 4)
-sliderCard(PgPlayer,  "↑",  "JumpPower",       1, 500, 50,  CFG.Accent, 5)
-sectionHeader(PgPlayer, "◈  ФИЗИКА", 6)
-toggleCard(PgPlayer,  "👻", "Noclip",          "Полёт сквозь стены",                CFG.Yellow, 7)
-toggleCard(PgPlayer,  "🕊️",  "Anti-Gravity",   "Уменьшение гравитации",             CFG.Purple, 8)
-sliderCard(PgPlayer,  "🌍", "Gravity",         0, 200, 100, CFG.Purple, 9)
+sectionHeader(PgVisuals, "◈ ESP", 1)
+toggleCard(PgVisuals, "📦", "ESP Boxes", "Рамки вокруг игроков", CFG.Purple, 2)
+toggleCard(PgVisuals, "↗️", "ESP Tracers", "Линии трассировки до игроков", CFG.Purple, 3)
+toggleCard(PgVisuals, "🏷️", "ESP Имена", "Имена игроков в пространстве", CFG.Purple, 4)
+toggleCard(PgVisuals, "❤️", "ESP Здоровье", "Полоска здоровья над головой", CFG.Red, 5)
 
--- == ПРОЧЕЕ ==
-sectionHeader(PgMisc, "◈  СИСТЕМА", 1)
-buttonCard(PgMisc, "🔑", "Получить ключ",    "Запрос лицензионного ключа",         CFG.Yellow, 2)
-buttonCard(PgMisc, "📡", "Проверить VPN",    "Тест соединения и анонимности",      CFG.Green,  3)
-buttonCard(PgMisc, "🗑️",  "Сброс настроек",  "Вернуть все значения по умолчанию",  CFG.Red,    4)
-sectionHeader(PgMisc, "◈  ИНТЕРФЕЙС", 5)
-dropdownCard(PgMisc, "🎨","Тема оформления", {"Cyan","Purple","Red","Green"},      CFG.Accent, 6)
-toggleCard(PgMisc,  "✨", "Партиклы",        "Фоновые анимированные частицы",      CFG.Purple, 7)
-toggleCard(PgMisc,  "📌", "Плавающая кнопка","Кнопка открытия хаба",              CFG.Accent, 8)
+sectionHeader(PgVisuals, "◈ МИРОВЫЕ ЭФФЕКТЫ", 6)
+toggleCard(PgVisuals, "🌟", "Full Bright", "Максимальная яркость карты", CFG.Yellow, 7)
+toggleCard(PgVisuals, "🌈", "Rainbow Noclip", "Визуальный эффект прозрачности", CFG.Accent, 8)
+dropdownCard(PgVisuals,"🎨","Цвет ESP", {"Голубой","Красный","Зелёный","Белый"}, CFG.Purple, 9)
+
+sectionHeader(PgPlayer, "◈ ДВИЖЕНИЕ", 1)
+toggleCard(PgPlayer, "🏃", "Speed Hack", "Увеличенная скорость бега", CFG.Green, 2)
+sliderCard(PgPlayer, "⚡", "WalkSpeed", 1, 500, 16, CFG.Green, 3)
+toggleCard(PgPlayer, "🦘", "High Jump", "Увеличенная высота прыжка", CFG.Accent, 4)
+sliderCard(PgPlayer, "↑", "JumpPower", 1, 500, 50, CFG.Accent, 5)
+
+sectionHeader(PgPlayer, "◈ ФИЗИКА", 6)
+toggleCard(PgPlayer, "👻", "Noclip", "Полёт сквозь стены", CFG.Yellow, 7)
+toggleCard(PgPlayer, "🕊️", "Anti-Gravity", "Уменьшение гравитации", CFG.Purple, 8)
+sliderCard(PgPlayer, "🌍", "Gravity", 0, 200, 100, CFG.Purple, 9)
+
+sectionHeader(PgMisc, "◈ СИСТЕМА", 1)
+buttonCard(PgMisc, "🔑", "Получить ключ", "Запрос лицензионного ключа", CFG.Yellow, 2)
+buttonCard(PgMisc, "📡", "Проверить VPN", "Тест соединения и анонимности", CFG.Green, 3)
+buttonCard(PgMisc, "🗑️", "Сброс настроек", "Вернуть все значения по умолчанию", CFG.Red, 4)
+
+sectionHeader(PgMisc, "◈ ИНТЕРФЕЙС", 5)
+dropdownCard(PgMisc, "🎨","Тема оформления", {"Cyan","Purple","Red","Green"}, CFG.Accent, 6)
+toggleCard(PgMisc, "✨", "Партиклы", "Фоновые анимированные частицы", CFG.Purple, 7)
+toggleCard(PgMisc, "📌", "Плавающая кнопка","Кнопка открытия хаба", CFG.Accent, 8)
 
 ----------------------------------------------------------------
 -- [НИЖНЯЯ ПАНЕЛЬ СТАТУСА]
@@ -1136,7 +1123,7 @@ local FooterText = Instance.new("TextLabel")
 FooterText.Size = UDim2.new(0.6,0,1,0)
 FooterText.Position = UDim2.new(0,10,0,0)
 FooterText.BackgroundTransparency = 1
-FooterText.Text = "Nexus Hub  •  Build 2024.12"
+FooterText.Text = "Nexus Hub • Build 2024.12"
 FooterText.TextSize = 9
 FooterText.Font = Enum.Font.Gotham
 FooterText.TextColor3 = CFG.TextMuted
@@ -1157,7 +1144,6 @@ PingLabel.ZIndex = 23
 PingLabel.Parent = Footer
 padding(Footer, 0,0,0,0,10)
 
--- Обновление пинга
 task.spawn(function()
     while task.wait(2) do
         local ok, p = pcall(function()
@@ -1180,10 +1166,12 @@ local function openHub()
     MainFrame.Visible = true
     MainFrame.Size = UDim2.new(0, 0, 0, 0)
     MainFrame.Position = UDim2.new(0.5,0,0.5,0)
+
     tween(MainFrame, {
         Size = UDim2.new(0,W,0,H),
         Position = UDim2.new(0.5,-W/2,0.5,-H/2)
     }, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
     tween(FB, {BackgroundTransparency=1}, 0.2)
     task.delay(0.25, function() FB.Visible = false end)
 end
@@ -1194,6 +1182,7 @@ local function closeHub()
         Size = UDim2.new(0,0,0,0),
         Position = UDim2.new(0.5,0,0.5,0)
     }, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+
     task.delay(0.3, function()
         MainFrame.Visible = false
         FB.Visible = true
@@ -1213,7 +1202,6 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Открываем при запуске
 task.delay(0.5, openHub)
 
 ----------------------------------------------------------------
@@ -1223,7 +1211,7 @@ local function burstParticles()
     for i = 1, 8 do
         task.delay(i*0.04, function()
             local vp = workspace.CurrentCamera.ViewportSize
-            local p  = Instance.new("Frame")
+            local p = Instance.new("Frame")
             p.Size = UDim2.new(0,4,0,4)
             p.Position = UDim2.new(0.5, math.random(-20,20), 0.5, math.random(-20,20))
             p.BackgroundColor3 = i%2==0 and CFG.Accent or CFG.Purple
@@ -1232,6 +1220,7 @@ local function burstParticles()
             p.ZIndex = 5
             corner(p, 99)
             p.Parent = ScreenGui
+
             tween(p, {
                 Position = UDim2.new(
                     0.5 + (math.random()-0.5)*0.4, 0,
@@ -1240,6 +1229,7 @@ local function burstParticles()
                 BackgroundTransparency = 1,
                 Size = UDim2.new(0,1,0,1)
             }, 0.6, Enum.EasingStyle.Quad)
+
             task.delay(0.65, function() p:Destroy() end)
         end)
     end
